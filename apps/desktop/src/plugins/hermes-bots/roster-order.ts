@@ -32,9 +32,11 @@ export function normalizeRosterOrder(value: unknown): string[] {
 
   for (const item of value) {
     const key = String(item || '').trim()
+
     if (!key || seen.has(key)) {
       continue
     }
+
     seen.add(key)
     out.push(key)
   }
@@ -70,7 +72,9 @@ export function rosterRowKey(row: { kind?: string; bot?: RosterRow; name?: strin
   if ('kind' in row && row.kind === 'group' && row.name) {
     return `group:${row.name}`
   }
+
   const bot = ('bot' in row && row.bot ? row.bot : row) as RosterRow
+
   return botRosterKey(bot)
 }
 
@@ -85,13 +89,16 @@ export function orderRosterRows<T extends { activity: number; pinned: boolean }>
   orderKeys: string[] = $rosterOrder.get()
 ): T[] {
   const cleanOrder = normalizeRosterOrder(orderKeys)
+
   if (!cleanOrder.length) {
     return rows.slice().sort((a, b) => {
       const pa = a.pinned ? 1 : 0
       const pb = b.pinned ? 1 : 0
+
       if (pa !== pb) {
         return pb - pa
       }
+
       return b.activity - a.activity
     })
   }
@@ -111,12 +118,15 @@ export function orderRosterRows<T extends { activity: number; pinned: boolean }>
       if (idxA >= 0 && idxB >= 0) {
         return idxA - idxB
       }
+
       if (idxA >= 0) {
         return -1
       }
+
       if (idxB >= 0) {
         return 1
       }
+
       return b.activity - a.activity
     })
   }
@@ -143,11 +153,13 @@ export function moveRosterItem(
 
   const baseOrder = [...normalizeRosterOrder(visibleKeys)]
   const fromIndex = baseOrder.indexOf(fromKey)
+
   if (fromIndex >= 0) {
     baseOrder.splice(fromIndex, 1)
   }
 
   const targetIndex = baseOrder.indexOf(toKey)
+
   if (targetIndex < 0) {
     baseOrder.push(fromKey)
   } else {

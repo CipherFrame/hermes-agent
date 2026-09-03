@@ -60,6 +60,7 @@ import { BOTS_LOCALES } from './i18n'
 import { displayName } from './labels'
 import { startBotRelay, stopBotRelay } from './relay'
 import { $activityToasts } from './roster-actions'
+import { loadRosterOrder } from './roster-order'
 import {
   botChatOwnsWorkspace,
   BotsPane,
@@ -71,7 +72,6 @@ import { botRosterMeta, botWorkspaceOwnerKey, setBotsWorkspaceOwner } from './ro
 import { startHideSweepScheduler } from './session-sweep'
 import { bumpBotOpenGeneration, getBotOpenGeneration, ID, setPluginCtx } from './shared'
 import type { GroupChat, RosterRow } from './types'
-import { loadRosterOrder } from './roster-order'
 import { loadBotSections } from './user-sections'
 
 // ── plugin ───────────────────────────────────────────────────────────────────

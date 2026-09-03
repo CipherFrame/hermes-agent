@@ -33,6 +33,7 @@ describe('roster-order', () => {
         name: 'secops',
         connectionId: 'local'
       }
+
       expect(rosterRowKey({ kind: 'bot', bot })).toBe('local::secops')
       expect(rosterRowKey(bot)).toBe('local::secops')
     })
@@ -66,6 +67,7 @@ describe('roster-order', () => {
         { key: 'pin-b', activity: 50, pinned: true },
         { key: 'normal-1', activity: 100, pinned: false }
       ]
+
       const sorted = orderRosterRows(rowsWithTwoPinned, r => r.key, ['pin-a', 'pin-b'])
       expect(sorted.map(r => r.key)).toEqual(['pin-a', 'pin-b', 'normal-1'])
 

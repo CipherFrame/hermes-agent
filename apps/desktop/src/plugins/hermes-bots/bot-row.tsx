@@ -521,6 +521,7 @@ export function GroupRow({ active, group, members, needsYou, onOpen, onDisband }
   )
 
   const groupDescription = (room.description || '').trim()
+
   const preview = last
     ? `${last.from?.kind === 'user' ? 'You' : `@${lastHandle}`}: ${stripPreviewMarkdown(last.text) || '…'}`
     : groupDescription || `${members.length} bots`

@@ -66,6 +66,15 @@ import { displayName } from './labels'
 import { deleteBot, mergeServerMeta, pullServerAvatars } from './profile-ops'
 import { $activityToasts, setActivityToasts, trackInboundActivity } from './roster-actions'
 import {
+  $rosterOrder,
+  clearRosterOrder,
+  moveRosterItem,
+  orderRosterRows,
+  persistRosterOrder,
+  rosterRowKey
+} from './roster-order'
+import { ReorderableRosterRow } from './roster-order-row'
+import {
   botNeedsHandleLabel,
   filterBotsByGateway,
   GatewayKindGlyph,
@@ -91,15 +100,6 @@ import {
   renameBotSection,
   UNASSIGNED_SECTION_KEY
 } from './user-sections'
-import {
-  $rosterOrder,
-  clearRosterOrder,
-  moveRosterItem,
-  orderRosterRows,
-  persistRosterOrder,
-  rosterRowKey
-} from './roster-order'
-import { ReorderableRosterRow } from './roster-order-row'
 import { SectionDropZone, SectionNameDialog, useEscapeCancelsBotDrag, UserSectionHeader } from './user-sections-ui'
 
 /** Last source inventory returned by the desktop-wide agent roster. */
@@ -563,6 +563,7 @@ export function BotsPane() {
 
   const renderBotRow = (bot: RosterRow, keyPrefix = '') => {
     const itemKey = botRosterKey(bot)
+
     return (
       <ReorderableRosterRow itemKey={itemKey} key={`${keyPrefix}${itemKey}`} onReorder={handleReorder}>
         <BotRow
@@ -579,6 +580,7 @@ export function BotsPane() {
 
   const renderGroupRow = (row: { members: GroupMember[]; name: string }) => {
     const itemKey = `group:${row.name}`
+
     return (
       <ReorderableRosterRow itemKey={itemKey} key={itemKey} onReorder={handleReorder}>
         <GroupRow
