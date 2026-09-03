@@ -91,6 +91,15 @@ import {
   renameBotSection,
   UNASSIGNED_SECTION_KEY
 } from './user-sections'
+import {
+  $rosterOrder,
+  clearRosterOrder,
+  moveRosterItem,
+  orderRosterRows,
+  persistRosterOrder,
+  rosterRowKey
+} from './roster-order'
+import { ReorderableRosterRow } from './roster-order-row'
 import { SectionDropZone, SectionNameDialog, useEscapeCancelsBotDrag, UserSectionHeader } from './user-sections-ui'
 
 /** Last source inventory returned by the desktop-wide agent roster. */
@@ -294,6 +303,7 @@ export function BotsPane() {
   const rosterHydrated = useValue($rosterHydrated)
   const selectionHydrated = useValue($selectedRosterHydrated)
   const selectedRosterKey = useValue($selectedRosterKey)
+  const rosterOrder = useValue($rosterOrder)
 
   // The socket opening (boot, SSH reconnect, sleep/wake) is the signal to
   // retry immediately instead of waiting out the poll interval.
@@ -415,16 +425,7 @@ export function BotsPane() {
         }))
 
   const sortRosterRows = <T extends { activity: number; pinned: boolean }>(rows: T[]): T[] =>
-    rows.slice().sort((a, b) => {
-      const pa = a.pinned ? 1 : 0
-      const pb = b.pinned ? 1 : 0
-
-      if (pa !== pb) {
-        return pb - pa
-      }
-
-      return b.activity - a.activity
-    })
+    orderRosterRows(rows, row => rosterRowKey(row as any), rosterOrder)
 
   const rosterRows = sortRosterRows([...botRows, ...groupRows])
   const sortedGroupRows = sortRosterRows(groupRows)
@@ -554,29 +555,43 @@ export function BotsPane() {
     return <GroupChatWorkspace group={groupChatName} members={groupChatMembers} />
   }
 
-  const renderBotRow = (bot: RosterRow, keyPrefix = '') => (
-    <BotRow
-      bot={bot}
-      key={`${keyPrefix}${botRosterKey(bot)}`}
-      onDelete={setDeleting}
-      onEdit={setEditing}
-      onGroup={setGrouping}
-      onNewSection={target => setSectionDialog({ bot: target, mode: 'create' })}
-      showHandle={botNeedsHandleLabel(bot, roster, allMeta)}
-    />
-  )
+  const handleReorder = (sourceKey: string, targetKey: string, position: 'before' | 'after') => {
+    const visibleKeys = rosterRows.map(r => rosterRowKey(r))
+    const nextOrder = moveRosterItem(rosterOrder, visibleKeys, sourceKey, targetKey, position)
+    persistRosterOrder(nextOrder)
+  }
 
-  const renderGroupRow = (row: { members: GroupMember[]; name: string }) => (
-    <GroupRow
-      active={groupChatName === row.name}
-      group={row.name}
-      key={`group:${row.name}`}
-      members={row.members}
-      needsYou={Boolean(groupNeedsYou[row.name])}
-      onDisband={setDeletingGroup}
-      onOpen={openGroupChat}
-    />
-  )
+  const renderBotRow = (bot: RosterRow, keyPrefix = '') => {
+    const itemKey = botRosterKey(bot)
+    return (
+      <ReorderableRosterRow itemKey={itemKey} key={`${keyPrefix}${itemKey}`} onReorder={handleReorder}>
+        <BotRow
+          bot={bot}
+          onDelete={setDeleting}
+          onEdit={setEditing}
+          onGroup={setGrouping}
+          onNewSection={target => setSectionDialog({ bot: target, mode: 'create' })}
+          showHandle={botNeedsHandleLabel(bot, roster, allMeta)}
+        />
+      </ReorderableRosterRow>
+    )
+  }
+
+  const renderGroupRow = (row: { members: GroupMember[]; name: string }) => {
+    const itemKey = `group:${row.name}`
+    return (
+      <ReorderableRosterRow itemKey={itemKey} key={itemKey} onReorder={handleReorder}>
+        <GroupRow
+          active={groupChatName === row.name}
+          group={row.name}
+          members={row.members}
+          needsYou={Boolean(groupNeedsYou[row.name])}
+          onDisband={setDeletingGroup}
+          onOpen={openGroupChat}
+        />
+      </ReorderableRosterRow>
+    )
+  }
 
   const removeSection = (id: string) => {
     const name = userSections.find(section => section.id === id)?.name || ''
@@ -769,6 +784,15 @@ export function BotsPane() {
                 <Codicon className="mr-1.5" name="new-folder" />
                 {b.sections.newSection}
               </DropdownMenuItem>
+              {rosterOrder.length > 0 ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => clearRosterOrder()}>
+                    <Codicon className="mr-1.5" name="clear-all" />
+                    Reset custom order
+                  </DropdownMenuItem>
+                </>
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

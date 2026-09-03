@@ -71,6 +71,7 @@ import { botRosterMeta, botWorkspaceOwnerKey, setBotsWorkspaceOwner } from './ro
 import { startHideSweepScheduler } from './session-sweep'
 import { bumpBotOpenGeneration, getBotOpenGeneration, ID, setPluginCtx } from './shared'
 import type { GroupChat, RosterRow } from './types'
+import { loadRosterOrder } from './roster-order'
 import { loadBotSections } from './user-sections'
 
 // ── plugin ───────────────────────────────────────────────────────────────────
@@ -96,9 +97,10 @@ export default {
     'Bot Mode — a one-chat-per-agent roster with avatars, routines, group chats, and bot-to-bot messaging. Ships with the app; disable here if unwanted.',
   register(ctx: PluginContext) {
     setPluginCtx(ctx)
-    // The user's own roster sections. Read once at register; every mutation
+    // The user's own roster sections and custom order. Read once at register; every mutation
     // writes through.
     loadBotSections()
+    loadRosterOrder()
     const disposeLocales = ctx.i18n.register(BOTS_LOCALES)
     setGroupChatSyncDisposed(false)
     startFaceClock()
@@ -244,6 +246,7 @@ export default {
                   holds: room.holds && typeof room.holds === 'object' ? room.holds : {},
                   members: Array.isArray(room.members) ? room.members : [],
                   roomId: typeof room.roomId === 'string' && room.roomId ? room.roomId : null,
+                  description: typeof room.description === 'string' && room.description ? room.description : undefined,
                   image: typeof room.image === 'string' && room.image ? room.image : null,
                   syncRevision: Math.max(0, Number(room.syncRevision || 0)),
                   epoch: 0,
