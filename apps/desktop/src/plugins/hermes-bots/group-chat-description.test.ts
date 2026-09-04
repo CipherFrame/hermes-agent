@@ -114,4 +114,12 @@ describe('group chat description', () => {
     const cleared = durableGroupChatRooms()
     expect(cleared['test-room']?.description).toBeUndefined()
   })
+
+  it('setGroupChatDescription clamps description to 512 characters', () => {
+    const longDesc = 'a'.repeat(600)
+    setGroupChatDescription('clamped-room', longDesc)
+    const durable = durableGroupChatRooms()
+    expect(durable['clamped-room']?.description).toHaveLength(512)
+    expect(durable['clamped-room']?.description).toBe('a'.repeat(512))
+  })
 })

@@ -484,7 +484,7 @@ export function mergeGroupChatSyncSnapshots(
         : {}),
       ...(typeof identity?.description === 'string' && identity.description.trim()
         ? {
-            description: identity.description.trim()
+            description: identity.description.trim().slice(0, 512)
           }
         : {})
     }
@@ -766,7 +766,7 @@ export function durableGroupChatRooms(all: Record<string, GroupChat> = $groupCha
       roomId: typeof room.roomId === 'string' && room.roomId ? room.roomId : null,
       ...(typeof room.description === 'string' && room.description.trim()
         ? {
-            description: room.description.trim()
+            description: room.description.trim().slice(0, 512)
           }
         : {}),
       image: room.image || null,
@@ -1418,7 +1418,10 @@ export function setGroupChatImage(group: string, image: null | string | undefine
 /** Set or clear a group chat's description. Persists with the room record. */
 export function setGroupChatDescription(group: string, description: null | string | undefined) {
   updateGroupChat(group, (room: GroupChatRoom) => {
-    const clean = String(description || '').trim()
+    const clean = String(description || '')
+      .trim()
+      .slice(0, 512)
+
     room.description = clean ? clean : undefined
 
     return room
